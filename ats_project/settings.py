@@ -19,6 +19,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-in-prod
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,ats-production-c260.up.railway.app').split(',')
+# Ensure no protocols in ALLOWED_HOSTS (common config error fix)
+ALLOWED_HOSTS = [host.replace('https://', '').replace('http://', '').strip() for host in ALLOWED_HOSTS]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://ats-production-c260.up.railway.app',
