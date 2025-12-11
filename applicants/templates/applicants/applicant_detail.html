@@ -56,6 +56,53 @@
             </div>
         </div>
 
+        <!-- AI Analysis Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-robot me-2"></i>AI-Powered CV Analysis</h5>
+                {% if resume_text and not ai_analysis %}
+                <form method="post" class="mb-0" id="ai-analyze-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="analyze_cv" value="1">
+                    <button type="submit" class="btn btn-light btn-sm" id="ai-analyze-btn">
+                        <i class="bi bi-magic me-1"></i>Analyze with AI
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div id="ai-loading" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-info" role="status"></div>
+                    <p class="mt-2 mb-0 text-info fw-bold">Generating AI analysis...</p>
+                </div>
+                <div id="ai-content">
+                {% if ai_analysis %}
+                    {% if ai_analysis.success %}
+                    <div class="ai-analysis-content">{{ ai_analysis.analysis|linebreaks }}</div>
+                    {% elif ai_analysis.error %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ ai_analysis.error }}
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-robot" style="font-size: 2rem;"></i>
+                    <p class="mt-2 mb-0">Click "Analyze with AI" to compare this CV with the job requirements.</p>
+                </div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <script>
+        document.getElementById('ai-analyze-form')?.addEventListener('submit', function() {
+            document.getElementById('ai-analyze-btn').disabled = true;
+            document.getElementById('ai-analyze-btn').innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating...';
+            document.getElementById('ai-loading').style.display = 'block';
+            document.getElementById('ai-content').style.display = 'none';
+        });
+        </script>
+
         <!-- Notes Card -->
         <div class="card shadow">
             <div class="card-header bg-secondary text-white">

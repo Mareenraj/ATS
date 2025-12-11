@@ -7,7 +7,7 @@ from django.contrib import messages
 from jobs.models import Job
 from .models import Applicant, ApplicantNote
 from .forms import ApplicationForm, ApplicantStatusForm, ApplicantNoteForm
-from .utils import extract_text_from_pdf
+from .utils import extract_text_from_pdf, analyze_cv_with_gemini
 
 
 def apply_view(request, job_id):
@@ -97,8 +97,24 @@ def applicant_detail_view(request, pk):
 
     # Extract resume text if PDF
     resume_text = None
+    ai_analysis = None
     if applicant.resume and applicant.resume.name.endswith('.pdf'):
         resume_text = extract_text_from_pdf(applicant.resume.path)
+
+    # AI Analysis - only run when requested via button click
+    if request.method == 'POST' and 'analyze_cv' in request.POST:
+        if resume_text and not resume_text.startswith("Error") and not resume_text.startswith("Unable"):
+            job = applicant.applied_job
+            ai_analysis = analyze_cv_with_gemini(
+                resume_text=resume_text,
+                job_description=job.description,
+                job_title=job.title,
+                job_requirements=job.requirements
+            )
+            if ai_analysis.get('error'):
+                messages.warning(request, f"AI Analysis: {ai_analysis['error']}")
+        else:
+            messages.warning(request, "Cannot analyze - resume text extraction failed.")
 
     status_form = ApplicantStatusForm(instance=applicant)
     note_form = ApplicantNoteForm()
@@ -110,6 +126,7 @@ def applicant_detail_view(request, pk):
         'note_form': note_form,
         'notes': notes,
         'resume_text': resume_text,
+        'ai_analysis': ai_analysis,
     }
     return render(request, 'applicants/applicant_detail.html', context)
 
