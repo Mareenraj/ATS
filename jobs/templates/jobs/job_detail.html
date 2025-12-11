@@ -21,7 +21,7 @@
                 <div class="mb-4">
                     <span class="me-3"><i class="bi bi-geo-alt text-primary"></i> {{ job.location }}</span>
                     {% if job.salary_range %}
-                    <span class="me-3"><i class="bi bi-currency-dollar text-success"></i> {{ job.salary_range }}</span>
+                    <span class="me-3"><span class="text-success fw-bold">LKR</span> {{ job.salary_range }}</span>
                     {% endif %}
                     <span><i class="bi bi-calendar text-warning"></i> Deadline: {{ job.deadline|date:"F d, Y" }}</span>
                 </div>

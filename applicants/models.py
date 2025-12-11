@@ -35,6 +35,10 @@ class Applicant(models.Model):
 
     class Meta:
         ordering = ['-applied_at']
+        unique_together = [
+            ['applied_job', 'email'],
+            ['applied_job', 'phone']
+        ]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.applied_job.title}"

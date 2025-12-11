@@ -24,11 +24,46 @@ def apply_view(request, job_id):
         return redirect('jobs:job_detail', pk=job_id)
 
     if request.method == 'POST':
+        # 1. Rate Limiting Check (1 application every 5 minutes)
+        last_applied = request.session.get('last_applied_timestamp')
+        import time
+        current_time = time.time()
+        
+        if last_applied and (current_time - last_applied < 300):  # 300 seconds = 5 minutes
+            wait_time = int((300 - (current_time - last_applied)) / 60)
+            messages.error(request, f'Please wait {wait_time + 1} minutes before submitting another application.')
+            return redirect('jobs:job_detail', pk=job_id)
+
         form = ApplicationForm(request.POST, request.FILES)
         if form.is_valid():
+            email = form.cleaned_data.get('email')
+            phone = form.cleaned_data.get('phone')
+
+            # 2. Duplicate Check
+            errors = []
+            
+            # Check if email belongs to the recruiter who posted the job
+            if email == job.created_by.email:
+                errors.append("You cannot apply using the recruiter's email address.")
+
+            if Applicant.objects.filter(applied_job=job, email=email).exists():
+                errors.append(f'You have already applied for this position with email {email}.')
+            
+            if Applicant.objects.filter(applied_job=job, phone=phone).exists():
+                errors.append(f'You have already applied for this position with phone number {phone}.')
+
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+                return redirect('jobs:job_detail', pk=job_id)
+
             applicant = form.save(commit=False)
             applicant.applied_job = job
             applicant.save()
+            
+            # Update session timestamp
+            request.session['last_applied_timestamp'] = current_time
+            
             messages.success(request, 'Application submitted successfully!')
             return redirect('applicants:application_success')
     else:

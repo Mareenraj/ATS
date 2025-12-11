@@ -19,7 +19,7 @@ class JobForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'location': forms.TextInput(attrs={'class': 'form-control'}),
             'employment_type': forms.Select(attrs={'class': 'form-control'}),
-            'salary_range': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., $60,000 - $80,000'}),
+            'salary_range': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., LKR 160,000 - LKR 200,000'}),
             'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'responsibilities': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'deadline': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
